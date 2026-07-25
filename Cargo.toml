@@ -1,0 +1,9 @@
+[package]
+name = "edgy_table"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+owo-colors = "4.3.0"
+unicode-width = "0.2.2"
+ascii = "1.1"
