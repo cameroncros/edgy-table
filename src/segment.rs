@@ -1,5 +1,7 @@
+use crate::renderer::Renderer;
 use ascii::AsciiChar;
 use owo_colors::{AnsiColors, OwoColorize};
+use std::io::Write;
 use unicode_width::UnicodeWidthStr;
 
 /// Represents a piece of text, with color applied to it.
@@ -29,8 +31,7 @@ fn sanitise_string(str: &str) -> String {
             }
         } else if c == '\n' {
             expanded.push('\n');
-        }
-        else if let Ok(ac) = AsciiChar::from_ascii(c) {
+        } else if let Ok(ac) = AsciiChar::from_ascii(c) {
             expanded.push(ac.as_printable_char())
         } else {
             expanded.push(c)
@@ -41,7 +42,6 @@ fn sanitise_string(str: &str) -> String {
 
 impl Segment {
     pub fn new(str: &str, color: AnsiColors) -> Self {
-
         Self {
             text: sanitise_string(str),
             color,
@@ -52,10 +52,18 @@ impl Segment {
         self.text.width()
     }
 
-    pub(crate) fn render(&self, max_width: usize) -> usize {
+    pub(crate) fn render(
+        &self,
+        renderer: &mut Renderer,
+        max_width: usize,
+    ) -> std::io::Result<usize> {
         let str = format!("{:.max_width$}", self.text);
-        print!("{}", str.color(self.color));
-        str.width()
+        if renderer.enable_color {
+            renderer.write_all(str.color(self.color).to_string().as_bytes())?;
+        } else {
+            renderer.write_all(str.as_bytes())?;
+        }
+        Ok(str.width())
     }
 
     /// Splits a segment on new-line.
@@ -86,7 +94,7 @@ macro_rules! seg {
 
 #[cfg(test)]
 mod tests {
-    use crate::segment::{sanitise_string, Segment};
+    use crate::segment::sanitise_string;
     use owo_colors::AnsiColors::Cyan;
 
     #[test]
@@ -146,7 +154,9 @@ mod tests {
         assert_eq!("Hello␈World", sanitise_string("Hello\x08World"));
 
         let all_bytes: String = (0u8..255u8).map(char::from).collect();
-        assert_eq!("␀␁␂␃␄␅␆␇␈   \n␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡\u{80}\u{81}\u{82}\u{83}\u{84}\u{85}\u{86}\u{87}\u{88}\u{89}\u{8a}\u{8b}\u{8c}\u{8d}\u{8e}\u{8f}\u{90}\u{91}\u{92}\u{93}\u{94}\u{95}\u{96}\u{97}\u{98}\u{99}\u{9a}\u{9b}\u{9c}\u{9d}\u{9e}\u{9f}\u{a0}¡¢£¤¥¦§¨©ª«¬\u{ad}®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ",
-                   sanitise_string(&all_bytes));
+        assert_eq!(
+            "␀␁␂␃␄␅␆␇␈   \n␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡\u{80}\u{81}\u{82}\u{83}\u{84}\u{85}\u{86}\u{87}\u{88}\u{89}\u{8a}\u{8b}\u{8c}\u{8d}\u{8e}\u{8f}\u{90}\u{91}\u{92}\u{93}\u{94}\u{95}\u{96}\u{97}\u{98}\u{99}\u{9a}\u{9b}\u{9c}\u{9d}\u{9e}\u{9f}\u{a0}¡¢£¤¥¦§¨©ª«¬\u{ad}®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ",
+            sanitise_string(&all_bytes)
+        );
     }
 }

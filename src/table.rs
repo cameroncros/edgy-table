@@ -1,3 +1,4 @@
+use crate::renderer::Renderer;
 use crate::row::Row;
 use std::cmp::max;
 
@@ -6,6 +7,7 @@ pub(crate) struct ColStats {
 }
 
 /// Main structure for building a table.
+#[derive(Default)]
 pub struct Table {
     col_stats: Vec<ColStats>,
     rows: Vec<Row>,
@@ -19,19 +21,20 @@ impl From<Vec<Row>> for Table {
     }
 }
 
+
 impl Table {
     pub fn new() -> Self {
         Self {
-            col_stats: vec![],
-            rows: vec![],
+            ..Default::default()
         }
     }
 
     /// Write the table.
-    pub fn render(&self) {
+    pub fn render(&self, renderer: &mut Renderer) -> std::io::Result<()> {
         for row in &self.rows {
-            row.render(&self.col_stats);
+            row.render(renderer, &self.col_stats)?;
         }
+        Ok(())
     }
 
     /// Add a row to the table.
@@ -55,33 +58,32 @@ impl Table {
 /// # use edgy_table::{cell::Cell};
 /// # use owo_colors::AnsiColors;
 /// let christmas_cell = Cell::from(vec![
-///             seg!["\t"],
-///             seg!["H", AnsiColors::Red],
-///             seg!["E", AnsiColors::Green],
-///             seg!["L", AnsiColors::Blue],
-///             seg!["L", AnsiColors::Green],
-///             seg!["O", AnsiColors::Red],
-///         ]);
+///     seg!["\t"],
+///     seg!["H", AnsiColors::Red],
+///     seg!["E", AnsiColors::Green],
+///     seg!["L", AnsiColors::Blue],
+///     seg!["L", AnsiColors::Green],
+///     seg!["O", AnsiColors::Red],
+/// ]);
 ///
-///         let christmas_cell2 = Cell::from(vec![
-///             seg!["H", AnsiColors::Red],
-///             seg!["E", AnsiColors::Green],
-///             seg!["L", AnsiColors::Blue],
-///             seg!["L", AnsiColors::Green],
-///             seg!["O", AnsiColors::Red],
-///             seg!["\n", AnsiColors::Red],
-///             seg!["W", AnsiColors::Magenta],
-///             seg!["O", AnsiColors::Cyan],
-///             seg!["R", AnsiColors::Yellow],
-///             seg!["L", AnsiColors::Cyan],
-///             seg!["D", AnsiColors::Magenta],
-///         ]);
+/// let christmas_cell2 = Cell::from(vec![
+///     seg!["H", AnsiColors::Red],
+///     seg!["E", AnsiColors::Green],
+///     seg!["L", AnsiColors::Blue],
+///     seg!["L", AnsiColors::Green],
+///     seg!["O", AnsiColors::Red],
+///     seg!["\n", AnsiColors::Red],
+///     seg!["W", AnsiColors::Magenta],
+///     seg!["O", AnsiColors::Cyan],
+///     seg!["R", AnsiColors::Yellow],
+///     seg!["L", AnsiColors::Cyan],
+///     seg!["D", AnsiColors::Magenta],
+/// ]);
 ///
-///         let table = table![
-///             row![christmas_cell, cell!["Hello\n\n\n\tWorld"],],
-///             row![cell!["Ｈｅｌｌｏ, ｗｏｒｌｄ!"], christmas_cell2,]
-///         ];
-///         table.render()
+/// let table = table![
+///     row![christmas_cell, cell!["Hello\n\n\n\tWorld"],],
+///     row![cell!["Ｈｅｌｌｏ, ｗｏｒｌｄ!"], christmas_cell2,]
+/// ];
 ///```
 #[macro_export]
 macro_rules! table {

@@ -1,4 +1,5 @@
 use crate::line::{Line, NULL_LINE};
+use crate::renderer::Renderer;
 use crate::segment::Segment;
 
 /// Empty cell.
@@ -59,8 +60,16 @@ impl Cell {
         self.lines.iter().map(|l| l.width()).max().unwrap_or(0)
     }
 
-    pub(crate) fn render_line(&self, i: usize, width: usize) {
-        self.lines.get(i).unwrap_or(&NULL_LINE).render(width);
+    pub(crate) fn render_line(
+        &self,
+        renderer: &mut Renderer,
+        i: usize,
+        width: usize,
+    ) -> std::io::Result<()> {
+        self.lines
+            .get(i)
+            .unwrap_or(&NULL_LINE)
+            .render(renderer, width)
     }
 }
 #[macro_export]

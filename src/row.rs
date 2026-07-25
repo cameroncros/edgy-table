@@ -1,5 +1,7 @@
 use crate::cell::{Cell, NULL_CELL};
+use crate::renderer::Renderer;
 use crate::table::ColStats;
+use std::io::Write;
 
 /// Represents a row of cells.
 pub struct Row {
@@ -8,15 +10,20 @@ pub struct Row {
 }
 
 impl Row {
-    pub(crate) fn render(&self, col_stats: &[ColStats]) {
+    pub(crate) fn render(
+        &self,
+        renderer: &mut Renderer,
+        col_stats: &[ColStats],
+    ) -> std::io::Result<()> {
         for line in 0..self.max_height {
             for (i, column) in col_stats.iter().enumerate() {
                 let cell = self.cells.get(i).unwrap_or(&NULL_CELL);
-                cell.render_line(line, column.max_width);
-                print!("  ");
+                cell.render_line(renderer, line, column.max_width)?;
+                renderer.write_all(b"  ")?;
             }
-            println!()
+            renderer.write_all(b"\n")?;
         }
+        Ok(())
     }
 }
 
