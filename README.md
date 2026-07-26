@@ -38,7 +38,7 @@ let table = table![
     row![christmas_cell, cell!["Hello\n\n\n\tWorld"],],
     row![cell!["Ｈｅｌｌｏ, ｗｏｒｌｄ!"], christmas_cell2,]
 ];
-let mut renderer = Renderer::new(Color::Off, Theme::basic());
+let mut renderer = Renderer::new(&Color::Off, Theme::basic());
 table.render(&mut renderer).unwrap();
 renderer.to_stdout().unwrap();
 ```

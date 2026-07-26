@@ -23,6 +23,7 @@ pub struct Theme {
 }
 
 impl Theme {
+    #[must_use]
     pub fn none() -> Self {
         Self {
             vertical_wall: Some(border_cell!["  "]),
@@ -30,6 +31,7 @@ impl Theme {
         }
     }
 
+    #[must_use]
     pub fn basic() -> Self {
         Self {
             top_left: Some(border_cell!["┌"]),
@@ -50,6 +52,7 @@ impl Theme {
         }
     }
 
+    #[must_use]
     pub fn wtf() -> Self {
         Self {
             top_left: Some(border_cell!["++\n++"]),

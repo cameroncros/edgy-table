@@ -33,15 +33,16 @@ fn sanitise_string(str: &str) -> String {
         } else if c == '\n' {
             expanded.push('\n');
         } else if let Ok(ac) = AsciiChar::from_ascii(c) {
-            expanded.push(ac.as_printable_char())
+            expanded.push(ac.as_printable_char());
         } else {
-            expanded.push(c)
+            expanded.push(c);
         }
     });
     expanded
 }
 
 impl Segment {
+    #[must_use]
     pub fn new(str: &str, color: AnsiColors) -> Self {
         Self {
             text: sanitise_string(str),
@@ -70,7 +71,7 @@ impl Segment {
     /// Splits a segment on new-line.
     pub(crate) fn split(self) -> Vec<Segment> {
         self.text
-            .split("\n")
+            .split('\n')
             .map(|s| Segment::new(s, self.color))
             .collect()
     }

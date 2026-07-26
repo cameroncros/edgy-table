@@ -16,13 +16,16 @@ pub struct Table {
 impl From<Vec<Row>> for Table {
     fn from(value: Vec<Row>) -> Self {
         let mut table = Table::new();
-        value.into_iter().for_each(|r| table.add_row(r));
+        for r in value {
+            table.add_row(r);
+        }
         table
     }
 }
 
 
 impl Table {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             ..Default::default()
@@ -54,8 +57,12 @@ impl Table {
             border_col_stats.push(ColStats { max_width: tr.width()});
         }
 
-        let row = Row::from(cells);
-        row.render_raw(renderer, &border_col_stats)
+        if !cells.is_empty() {
+            let row = Row::from(cells);
+            row.render_raw(renderer, &border_col_stats)?;
+        }
+
+        Ok(())
     }
 
     fn render_middle(&self, renderer: &mut Renderer) -> std::io::Result<()> {
@@ -83,8 +90,12 @@ impl Table {
             border_col_stats.push(ColStats { max_width: tr.width()});
         }
 
-        let row = Row::from(cells);
-        row.render_raw(renderer, &border_col_stats)
+        if !cells.is_empty() {
+            let row = Row::from(cells);
+            row.render_raw(renderer, &border_col_stats)?;
+        }
+
+        Ok(())
     }
 
     fn render_bottom(&self, renderer: &mut Renderer) -> std::io::Result<()> {
@@ -112,11 +123,19 @@ impl Table {
             border_col_stats.push(ColStats { max_width: tr.width()});
         }
 
-        let row = Row::from(cells);
-        row.render_raw(renderer, &border_col_stats)
+        if !cells.is_empty() {
+            let row = Row::from(cells);
+            row.render_raw(renderer, &border_col_stats)?;
+        }
+
+        Ok(())
     }
 
     /// Write the table.
+    ///
+    /// # Errors
+    ///
+    /// Bubbles up errors from `write_fmt`
     pub fn render(&self, renderer: &mut Renderer) -> std::io::Result<()> {
         self.render_top(renderer)?;
         for (i, row) in self.rows.iter().enumerate() {
@@ -138,7 +157,7 @@ impl Table {
             col_stat.max_width = max(col_stat.max_width, cell.width());
         });
 
-        self.rows.push(new_row)
+        self.rows.push(new_row);
     }
 }
 

@@ -28,7 +28,7 @@ impl Line {
     }
 
     pub fn width(&self) -> usize {
-        self.segments.iter().map(|l| l.width()).sum()
+        self.segments.iter().map(super::segment::Segment::width).sum()
     }
 
     pub fn render(&self, renderer: &mut Renderer, width: usize, repeat: bool) -> std::io::Result<()> {

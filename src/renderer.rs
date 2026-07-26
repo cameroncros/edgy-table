@@ -28,13 +28,14 @@ pub enum Color {
 }
 
 impl Renderer {
-    pub fn new(color: Color, theme: Theme) -> Self {
+    #[must_use]
+    pub fn new(color: &Color, theme: Theme) -> Self {
         let color = match color {
             Color::Auto => check_color(),
             Color::On => true,
             Color::Off => false,
         };
-        
+
         Self {
             writer: Vec::with_capacity(1000),
             theme: Rc::new(theme),
@@ -42,10 +43,20 @@ impl Renderer {
         }
     }
 
+    /// Write the rendered table to stdout.
+    ///
+    /// # Errors
+    ///
+    /// Returns errors from `stdout().write_all`
     pub fn to_stdout(&self) -> Result<()> {
         stdout().write_all(&self.writer)
     }
 
+    /// Write the rendered table to a string.
+    ///
+    /// # Errors
+    ///
+    /// Returns errors from `String::from_utf8`
     pub fn to_string(&self) -> std::result::Result<String, FromUtf8Error> {
         String::from_utf8(self.writer.clone())
     }
@@ -58,5 +69,28 @@ impl Write for Renderer {
 
     fn flush(&mut self) -> Result<()> {
         self.writer.flush()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::renderer::check_color;
+
+    #[test]
+    fn test_check_color() {
+        unsafe {
+            std::env::set_var("FORCE_COLOR", "1");
+        }
+        assert!(check_color());
+        unsafe {
+            std::env::remove_var("FORCE_COLOR");
+            std::env::set_var("NO_COLOR", "1");
+        }
+        assert!(!check_color());
+        unsafe {
+            std::env::remove_var("FORCE_COLOR");
+            std::env::remove_var("NO_COLOR");
+        }
+        let _ = check_color();
     }
 }

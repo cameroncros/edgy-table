@@ -1,5 +1,7 @@
 #![doc = include_str!("../README.md")]
 
+#![warn(clippy::pedantic)]
+
 pub mod cell;
 mod line;
 pub mod renderer;
@@ -46,7 +48,7 @@ mod tests {
             row![cell!["Ｈｅｌｌｏ, ｗｏｒｌｄ!"], christmas_cell2,]
         ];
 
-        let mut renderer = Renderer::new(Color::Off, Theme::wtf());
+        let mut renderer = Renderer::new(&Color::Off, Theme::wtf());
         table.render(&mut renderer).unwrap();
 
         let expected = r#"++#######################++#########++
@@ -71,7 +73,11 @@ mod tests {
             .join("\n");
         assert_eq!(expected, actual);
 
-        let mut renderer = Renderer::new(Color::On, Theme::basic());
+        let mut renderer = Renderer::new(&Color::On, Theme::basic());
+        table.render(&mut renderer).unwrap();
+        renderer.to_stdout().unwrap();
+
+        let mut renderer = Renderer::new(&Color::Auto, Theme::none());
         table.render(&mut renderer).unwrap();
         renderer.to_stdout().unwrap();
     }

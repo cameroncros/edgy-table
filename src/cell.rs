@@ -24,9 +24,7 @@ impl From<&str> for Cell {
 impl From<Vec<Segment>> for Cell {
     fn from(value: Vec<Segment>) -> Self {
         let mut cell = Cell::new();
-        value
-            .into_iter()
-            .for_each(|segment: Segment| cell.add(segment));
+        for segment in value { cell.add(segment); }
         cell
     }
 }
@@ -57,7 +55,7 @@ impl Cell {
     }
 
     pub(crate) fn width(&self) -> usize {
-        self.lines.iter().map(|l| l.width()).max().unwrap_or(0)
+        self.lines.iter().map(super::line::Line::width).max().unwrap_or(0)
     }
 
     pub(crate) fn render_line(
