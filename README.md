@@ -9,7 +9,7 @@ Example Usage:
 
 ```
 # use edgy_table::{seg, row, cell, table};
-# use edgy_table::{cell::Cell, renderer::Renderer};
+# use edgy_table::{cell::Cell, renderer::Renderer, renderer::Color, theme::Theme};
 # use owo_colors::AnsiColors;
 let christmas_cell = Cell::from(vec![
     seg!["\t"],
@@ -38,7 +38,7 @@ let table = table![
     row![christmas_cell, cell!["Hello\n\n\n\tWorld"],],
     row![cell!["Ｈｅｌｌｏ, ｗｏｒｌｄ!"], christmas_cell2,]
 ];
-let mut renderer = Renderer::force_color();
+let mut renderer = Renderer::new(Color::Off, Theme::basic());
 table.render(&mut renderer).unwrap();
 renderer.to_stdout().unwrap();
 ```

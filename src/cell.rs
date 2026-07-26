@@ -3,21 +3,21 @@ use crate::renderer::Renderer;
 use crate::segment::Segment;
 
 /// Empty cell.
-pub static NULL_CELL: Cell = Cell { lines: vec![] };
+pub static NULL_CELL: Cell = Cell { lines: vec![], repeat: false };
 
 /// Represents a cell.
 /// Cells are broken up into multiple lines.
+#[derive(Clone)]
 pub struct Cell {
+    pub(crate) repeat: bool,
     lines: Vec<Line>,
 }
 
 impl From<&str> for Cell {
     fn from(value: &str) -> Self {
-        let lines = value
-            .split("\n")
-            .map(|l| Line::from(Segment::from(l)))
-            .collect();
-        Cell { lines }
+        let mut cell = Cell::new();
+        cell.add(Segment::from(value));
+        cell
     }
 }
 
@@ -33,7 +33,7 @@ impl From<Vec<Segment>> for Cell {
 
 impl Cell {
     fn new() -> Self {
-        Cell { lines: vec![] }
+        Cell { lines: vec![], repeat: false }
     }
 
     fn add<S: Into<Segment>>(&mut self, segment: S) {
@@ -66,15 +66,30 @@ impl Cell {
         i: usize,
         width: usize,
     ) -> std::io::Result<()> {
-        self.lines
-            .get(i)
-            .unwrap_or(&NULL_LINE)
-            .render(renderer, width)
+        if self.repeat {
+            self.lines.get(i % self.lines.len()).unwrap_or(&NULL_LINE).render(renderer,width,self.repeat)
+        } else {
+            self.lines
+                .get(i)
+                .unwrap_or(&NULL_LINE)
+                .render(renderer, width, self.repeat)
+        }
     }
 }
 #[macro_export]
 macro_rules! cell {
     ($value:expr) => {
         Cell::from($value)
+    };
+}
+
+#[macro_export]
+macro_rules! border_cell {
+    ($value:expr) => {
+        {
+            let mut cell = Cell::from($value);
+            cell.repeat = true;
+            cell
+        }
     };
 }

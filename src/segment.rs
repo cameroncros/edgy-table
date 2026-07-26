@@ -5,6 +5,7 @@ use std::io::Write;
 use unicode_width::UnicodeWidthStr;
 
 /// Represents a piece of text, with color applied to it.
+#[derive(Clone)]
 pub struct Segment {
     text: String,
     color: AnsiColors,

@@ -6,14 +6,15 @@ pub mod renderer;
 pub mod row;
 pub mod segment;
 pub mod table;
-mod theme;
+pub mod theme;
 
 #[cfg(test)]
 mod tests {
     use crate::cell::Cell;
-    use crate::renderer::Renderer;
+    use crate::renderer::{Color, Renderer};
     use crate::{cell, row, seg, table};
     use owo_colors::AnsiColors;
+    use crate::theme::Theme;
 
     #[test]
     fn test_render_simple() {
@@ -45,15 +46,21 @@ mod tests {
             row![cell!["Ｈｅｌｌｏ, ｗｏｒｌｄ!"], christmas_cell2,]
         ];
 
-        let mut renderer = Renderer::no_color();
+        let mut renderer = Renderer::new(Color::Off, Theme::wtf());
         table.render(&mut renderer).unwrap();
 
-        let expected = r#"    HELLO                Hello
-
-
-                         	World
-Ｈｅｌｌｏ, ｗｏｒｌｄ!  HELLO
-                         WORLD
+        let expected = r#"++#######################++#########++
+++#######################++#########++
+##    HELLO              ##Hello    ##
+##                       ##         ##
+##                       ##         ##
+##                       ##    World##
+++#######################++#########++
+++#######################++#########++
+##Ｈｅｌｌｏ, ｗｏｒｌｄ!##HELLO    ##
+##                       ##WORLD    ##
+++#######################++#########++
+++#######################++#########++
 "#;
         let actual = renderer
             .to_string()
@@ -64,7 +71,7 @@ mod tests {
             .join("\n");
         assert_eq!(expected, actual);
 
-        let mut renderer = Renderer::force_color();
+        let mut renderer = Renderer::new(Color::On, Theme::basic());
         table.render(&mut renderer).unwrap();
         renderer.to_stdout().unwrap();
     }

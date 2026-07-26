@@ -1,9 +1,13 @@
 use std::io::Result;
 use std::io::{IsTerminal, Write, stdout};
+use std::rc::Rc;
 use std::string::FromUtf8Error;
+use crate::theme::Theme;
+
 
 pub struct Renderer {
     writer: Vec<u8>,
+    pub(crate) theme: Rc<Theme>,
     pub(crate) enable_color: bool,
 }
 
@@ -17,25 +21,24 @@ fn check_color() -> bool {
     }
 }
 
+pub enum Color {
+    Auto,
+    On,
+    Off
+}
+
 impl Renderer {
-    pub fn auto_color() -> Self {
+    pub fn new(color: Color, theme: Theme) -> Self {
+        let color = match color {
+            Color::Auto => check_color(),
+            Color::On => true,
+            Color::Off => false,
+        };
+        
         Self {
-            writer: Vec::new(),
-            enable_color: check_color(),
-        }
-    }
-
-    pub fn no_color() -> Self {
-        Self {
-            writer: Vec::new(),
-            enable_color: false,
-        }
-    }
-
-    pub fn force_color() -> Self {
-        Self {
-            writer: Vec::new(),
-            enable_color: true,
+            writer: Vec::with_capacity(1000),
+            theme: Rc::new(theme),
+            enable_color: color
         }
     }
 

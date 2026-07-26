@@ -29,12 +29,103 @@ impl Table {
         }
     }
 
+    fn render_top(&self, renderer: &mut Renderer) -> std::io::Result<()> {
+        let mut border_col_stats = vec![];
+
+        let mut cells = vec![];
+        if let Some(tl) = &renderer.theme.top_left {
+            cells.push(tl.clone());
+            border_col_stats.push(ColStats { max_width: tl.width()});
+        }
+
+        for (i, cell) in self.col_stats.iter().enumerate() {
+            if i != 0 && let Some(ti) = &renderer.theme.top_intersection {
+                cells.push(ti.clone());
+                border_col_stats.push(ColStats { max_width: ti.width()});
+            }
+            if let Some(tb) = &renderer.theme.top_border {
+                cells.push(tb.clone());
+                border_col_stats.push(ColStats { max_width: cell.max_width});
+            }
+        }
+
+        if let Some(tr) = &renderer.theme.top_right {
+            cells.push(tr.clone());
+            border_col_stats.push(ColStats { max_width: tr.width()});
+        }
+
+        let row = Row::from(cells);
+        row.render_raw(renderer, &border_col_stats)
+    }
+
+    fn render_middle(&self, renderer: &mut Renderer) -> std::io::Result<()> {
+        let mut border_col_stats = vec![];
+
+        let mut cells = vec![];
+        if let Some(tl) = &renderer.theme.left_intersection {
+            cells.push(tl.clone());
+            border_col_stats.push(ColStats { max_width: tl.width()});
+        }
+
+        for (i, cell) in self.col_stats.iter().enumerate() {
+            if i != 0 && let Some(ti) = &renderer.theme.intersection {
+                cells.push(ti.clone());
+                border_col_stats.push(ColStats { max_width: ti.width()});
+            }
+            if let Some(tb) = &renderer.theme.horizontal_wall {
+                cells.push(tb.clone());
+                border_col_stats.push(ColStats { max_width: cell.max_width});
+            }
+        }
+
+        if let Some(tr) = &renderer.theme.right_intersection {
+            cells.push(tr.clone());
+            border_col_stats.push(ColStats { max_width: tr.width()});
+        }
+
+        let row = Row::from(cells);
+        row.render_raw(renderer, &border_col_stats)
+    }
+
+    fn render_bottom(&self, renderer: &mut Renderer) -> std::io::Result<()> {
+        let mut border_col_stats = vec![];
+
+        let mut cells = vec![];
+        if let Some(tl) = &renderer.theme.bottom_left {
+            cells.push(tl.clone());
+            border_col_stats.push(ColStats { max_width: tl.width()});
+        }
+
+        for (i, cell) in self.col_stats.iter().enumerate() {
+            if i != 0 && let Some(ti) = &renderer.theme.bottom_intersection {
+                cells.push(ti.clone());
+                border_col_stats.push(ColStats { max_width: ti.width()});
+            }
+            if let Some(tb) = &renderer.theme.bottom_border {
+                cells.push(tb.clone());
+                border_col_stats.push(ColStats { max_width: cell.max_width});
+            }
+        }
+
+        if let Some(tr) = &renderer.theme.bottom_right {
+            cells.push(tr.clone());
+            border_col_stats.push(ColStats { max_width: tr.width()});
+        }
+
+        let row = Row::from(cells);
+        row.render_raw(renderer, &border_col_stats)
+    }
+
     /// Write the table.
     pub fn render(&self, renderer: &mut Renderer) -> std::io::Result<()> {
-        for row in &self.rows {
+        self.render_top(renderer)?;
+        for (i, row) in self.rows.iter().enumerate() {
+            if i != 0 {
+                self.render_middle(renderer)?;
+            }
             row.render(renderer, &self.col_stats)?;
         }
-        Ok(())
+        self.render_bottom(renderer)
     }
 
     /// Add a row to the table.
